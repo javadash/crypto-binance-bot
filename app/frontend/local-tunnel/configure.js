@@ -42,6 +42,7 @@ const connect = async logger => {
   if (config.get('localTunnel.enabled') !== true) {
     logger.info('Local tunnel is disabled');
     await cache.hdel('trailing-trade-common', 'local-tunnel-url');
+    await cache.hdel('trailing-trade-common', 'local-tunnel-webhook-url');
     return false;
   }
 
@@ -71,15 +72,26 @@ const connect = async logger => {
     'local-tunnel-url'
   );
 
+  // Create webhook URL by appending /webhook to the tunnel URL
+  const webhookUrl = `${tunnel.url}/webhook`;
+  const cachedWebhookURL = await cache.hget(
+    'trailing-trade-common',
+    'local-tunnel-webhook-url'
+  );
+
   // If new url is different, then notify slack
   if (cachedLocalTunnelURL !== tunnel.url) {
     // Save config with local tunnel url
     await cache.hset('trailing-trade-common', 'local-tunnel-url', tunnel.url);
+    await cache.hset('trailing-trade-common', 'local-tunnel-webhook-url', webhookUrl);
 
-    slack.sendMessage(`*Public URL:* ${tunnel.url}`, { symbol: 'global' });
+    slack.sendMessage(
+      `*Public URL:* ${tunnel.url}\n*Webhook URL:* ${webhookUrl}`, 
+      { symbol: 'global' }
+    );
     logger.info(
-      { localTunnelURL: tunnel.url },
-      'New URL detected, sent to Slack.'
+      { localTunnelURL: tunnel.url, webhookURL: webhookUrl },
+      'New URLs detected, sent to Slack.'
     );
   }
 
