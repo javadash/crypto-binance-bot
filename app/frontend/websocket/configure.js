@@ -1,12 +1,10 @@
 const { v4: uuidv4 } = require('uuid');
 const WebSocket = require('ws');
 const config = require('config');
-
+const { cache, PubSub } = require('../../helpers');
 const {
   verifyAuthenticated
 } = require('../../cronjob/trailingTradeHelper/common');
-
-const { PubSub } = require('../../helpers');
 
 const {
   handleLatest,
@@ -44,6 +42,22 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
   const logger = funcLogger.child({ server: 'websocket' });
   const wss = new WebSocket.Server({
     noServer: true
+  });
+
+  PubSub.subscribe('tradingview-alert', (message, data) => {
+    logger.info({ data }, 'Publishing tradingview-alert to frontend');
+
+    // Broadcast to all connected clients
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
+        client.send(
+          JSON.stringify({
+            type: 'tradingview-alert',
+            data,
+          })
+        );
+      }
+    });
   });
 
   PubSub.subscribe('tradingview-alert', (message, data) => {
