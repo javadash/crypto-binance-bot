@@ -162,32 +162,32 @@ class App extends React.Component {
   }
 
   connectWebSocket() {
-    const instance = new WebSocket(config.webSocketUrl);
+    // Store WebSocket instance in a variable first
+    let ws = null;
+    try {
+      ws = new WebSocket(config.webSocketUrl);
+    } catch (err) {
+      console.error('Failed to create WebSocket connection:', err);
+      return;
+    }
 
-    this.setState(prevState => ({
-      webSocket: {
-        ...prevState.webSocket,
-        instance
-      }
-    }));
-
-    const self = this;
-
-    instance.onopen = () => {
+    // Set up handlers before setting state
+    ws.onopen = () => {
       console.log('Connection is successfully established.');
       this.toast({
         type: 'success',
         title: 'Connected to the bot.'
       });
-      self.setState(prevState => ({
+      this.setState(prevState => ({
         webSocket: {
           ...prevState.webSocket,
-          connected: true
+          connected: true,
+          instance: ws
         }
       }));
     };
 
-    this.state.webSocket.instance.onmessage = evt => {
+    ws.onmessage = evt => {
       let response = {};
       try {
         response = JSON.parse(evt.data);
@@ -266,24 +266,35 @@ class App extends React.Component {
       }
     };
 
-    instance.onclose = () => {
+    ws.onclose = () => {
       console.log('Socket is closed. Reconnect will be attempted in 1 second.');
-
       this.toast({
         type: 'info',
         title: 'Disconnected from the bot. Reconnecting...'
       });
-      self.setState(prevState => ({
+      this.setState(prevState => ({
         webSocket: {
           ...prevState.webSocket,
-          connected: false
+          connected: false,
+          instance: null
         }
       }));
 
-      setTimeout(function () {
-        self.connectWebSocket();
-      }, 1000);
+      // Only attempt reconnect if component is still mounted
+      if (this._isMounted) {
+        setTimeout(() => {
+          this.connectWebSocket();
+        }, 1000);
+      }
     };
+
+    // Set initial state with WebSocket instance
+    this.setState(prevState => ({
+      webSocket: {
+        ...prevState.webSocket,
+        instance: ws
+      }
+    }));
   }
 
   isAccountLoaded() {
@@ -345,6 +356,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
     let selectedSortOption = {
       sortBy: 'default',
       sortByDesc: false,
@@ -371,7 +383,13 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID);
+    this._isMounted = false;
+    if (this.state.webSocket.instance) {
+      this.state.webSocket.instance.close();
+    }
+    if (this.timerID) {
+      clearInterval(this.timerID);
+    }
   }
 
   render() {
