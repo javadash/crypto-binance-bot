@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable no-undef */
 
@@ -63,7 +64,8 @@ class App extends React.Component {
       page: 1,
       totalPages: 1,
       tradingViewIntervals: ['1m', '5m', '15m', '30m', '1h', '2h', '4h', '1d'],
-      tradingViews: []
+      tradingViews: [],
+      latestAlert: null
     };
     this.requestLatest = this.requestLatest.bind(this);
     this.connectWebSocket = this.connectWebSocket.bind(this);
@@ -145,35 +147,13 @@ class App extends React.Component {
   }
 
   toast({ type, title }) {
-    // this.notyf.dismissAll();
     if (type !== 'warning' && type !== 'error') {
       if (title.toLowerCase().includes('buy ')) {
         type = 'buy';
       }
-
-      if (response.type === 'tradingview-alert') {
-        const alert = response.data;
-
-        // Show toast notification
-        this.toast({
-          type: alert.order_action.toLowerCase() === 'buy' ? 'buy' : 'sell',
-          title: `New Alert: ${alert.order_action} ${alert.ticker} at ${alert.bar.close}`,
-        });
-
-        // Update the latest alert in the state
-        this.setState({ latestAlert: alert });
-      }
       if (title.toLowerCase().includes('sell ')) {
         type = 'sell';
       }
-    }
-
-    if (response.type === 'latest') {
-      // Existing code...
-      this.setState({
-        // Existing state updates...
-        latestAlert: response.latestAlert,
-      });
     }
     this.notyf.open({
       type,
@@ -250,7 +230,8 @@ class App extends React.Component {
             0
           ),
           totalPages: _.get(response, ['common', 'totalPages'], 1),
-          tradingViews: _.get(response, ['stats', 'tradingViews'], [])
+          tradingViews: _.get(response, ['stats', 'tradingViews'], []),
+          latestAlert: response.latestAlert
         });
       }
 
@@ -259,6 +240,17 @@ class App extends React.Component {
           type: response.message.type,
           title: response.message.title
         });
+      }
+
+      if (response.type === 'tradingview-alert') {
+        const alert = response.data;
+        // Show toast notification
+        this.toast({
+          type: alert.order_action.toLowerCase() === 'buy' ? 'buy' : 'sell',
+          title: `New Alert: ${alert.order_action} ${alert.ticker} at ${alert.bar.close}`
+        });
+        // Update the latest alert in the state
+        this.setState({ latestAlert: alert });
       }
 
       if (response.type === 'dust-transfer-get-result') {
@@ -383,7 +375,6 @@ class App extends React.Component {
   }
 
   render() {
-    import LatestAlert from './LatestAlert';
 
     const {
       webSocket: { connected },
@@ -411,7 +402,8 @@ class App extends React.Component {
       page,
       totalPages,
       tradingViewIntervals,
-      tradingViews
+      tradingViews,
+      latestAlert
     } = this.state;
 
     if (isLoaded === false) {
