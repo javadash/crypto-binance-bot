@@ -187,7 +187,7 @@ class App extends React.Component {
       }));
     };
 
-    ws.onmessage = evt => {
+    ws.onmessage = (evt) => {
       let response = {};
       try {
         response = JSON.parse(evt.data);
@@ -195,7 +195,7 @@ class App extends React.Component {
 
       if (response.type === 'latest') {
         // Set states
-        self.setState({
+        this.setState({
           isLoaded: true,
           isAuthenticated: response.isAuthenticated,
           botOptions: response.botOptions,
@@ -254,13 +254,13 @@ class App extends React.Component {
       }
 
       if (response.type === 'dust-transfer-get-result') {
-        self.setState({
+        this.setState({
           dustTransfer: response.dustTransfer
         });
       }
 
       if (response.type === 'exchange-symbols-get-result') {
-        self.setState({
+        this.setState({
           exchangeSymbols: response.exchangeSymbols
         });
       }
