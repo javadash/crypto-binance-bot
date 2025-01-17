@@ -46,6 +46,22 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
     noServer: true
   });
 
+  PubSub.subscribe('tradingview-alert', (message, data) => {
+    logger.info({ data }, 'Publishing tradingview-alert to frontend');
+
+    // Broadcast to all connected clients
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
+        client.send(
+          JSON.stringify({
+            type: 'tradingview-alert',
+            data,
+          })
+        );
+      }
+    });
+  });
+
   wss.on('connection', ws => {
     ws.on('message', async message => {
       // eslint-disable-next-line no-underscore-dangle
@@ -118,12 +134,16 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
       await commandMaps[payload.command](commandLogger, ws, payload);
     });
 
+    const latestAlertJSON = await cache.hget('tradingview', 'latest-alert');
+    const latestAlert = latestAlertJSON ? JSON.parse(latestAlertJSON) : null;
+
     ws.send(
       JSON.stringify({
         result: true,
         type: 'connection_success',
         message: 'You are successfully connected to WebSocket.'
-      })
+        latestAlert,
+      });
     );
 
     PubSub.subscribe('frontend-notification', async (message, data) => {

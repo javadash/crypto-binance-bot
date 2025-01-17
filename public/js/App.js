@@ -150,9 +150,30 @@ class App extends React.Component {
       if (title.toLowerCase().includes('buy ')) {
         type = 'buy';
       }
+
+      if (response.type === 'tradingview-alert') {
+        const alert = response.data;
+
+        // Show toast notification
+        this.toast({
+          type: alert.order_action.toLowerCase() === 'buy' ? 'buy' : 'sell',
+          title: `New Alert: ${alert.order_action} ${alert.ticker} at ${alert.bar.close}`,
+        });
+
+        // Update the latest alert in the state
+        this.setState({ latestAlert: alert });
+      }
       if (title.toLowerCase().includes('sell ')) {
         type = 'sell';
       }
+    }
+
+    if (response.type === 'latest') {
+      // Existing code...
+      this.setState({
+        // Existing state updates...
+        latestAlert: response.latestAlert,
+      });
     }
     this.notyf.open({
       type,
@@ -186,7 +207,7 @@ class App extends React.Component {
       }));
     };
 
-    instance.onmessage = evt => {
+    this.state.webSocket.instance.onmessage = evt => {
       let response = {};
       try {
         response = JSON.parse(evt.data);
@@ -362,6 +383,8 @@ class App extends React.Component {
   }
 
   render() {
+    import LatestAlert from './LatestAlert';
+
     const {
       webSocket: { connected },
       packageVersion,
@@ -555,6 +578,7 @@ class App extends React.Component {
           </div>
         )}
 
+        <LatestAlert alert={latestAlert} />
         <Footer packageVersion={packageVersion} gitHash={gitHash} />
       </React.Fragment>
     );
