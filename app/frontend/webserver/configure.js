@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { PubSub, cache, mongo } = require('../../helpers');
+const WebSocket = require('ws');
 const config = require('config');
 
 const { setHandlers } = require('./handlers');
@@ -63,6 +64,8 @@ const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
     // Send response back to TradingView
     res.status(200).json({ success: true, message: 'Alert received' });
   });
+
+  const wss = new WebSocket.Server({ noServer: true });
 
   PubSub.subscribe('tradingview-alert', (message, data) => {
     logger.info({ data }, 'Publishing tradingview-alert to frontend');
