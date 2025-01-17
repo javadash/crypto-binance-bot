@@ -64,6 +64,31 @@ const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
     res.status(200).json({ success: true, message: 'Alert received' });
   });
 
+  PubSub.subscribe('tradingview-alert', (message, data) => {
+    logger.info({ data }, 'Publishing tradingview-alert to frontend');
+
+    // Fetch latest alert from cache using Promise chaining
+    cache.hget('tradingview', 'latest-alert')
+      .then(latestAlertJSON => {
+        const latestAlert = JSON.parse(latestAlertJSON || '{}');
+
+        // Broadcast to all connected clients
+        wss.clients.forEach(ws => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(
+              JSON.stringify({
+                type: 'tradingview-alert',
+                data: latestAlert
+              })
+            );
+          }
+        });
+      })
+      .catch(error => {
+        logger.error({ error }, 'Failed to get latest alert from cache');
+      });
+  });
+
   await setHandlers(logger, app, { loginLimiter });
 };
 
