@@ -187,7 +187,7 @@ class App extends React.Component {
       }));
     };
 
-    ws.onmessage = (evt) => {
+    ws.onmessage = (evt => {
       let response = {};
       try {
         response = JSON.parse(evt.data);
@@ -264,7 +264,7 @@ class App extends React.Component {
           exchangeSymbols: response.exchangeSymbols
         });
       }
-    };
+    }).bind(this);
 
     ws.onclose = () => {
       console.log('Socket is closed. Reconnect will be attempted in 1 second.');
