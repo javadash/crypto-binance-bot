@@ -2,22 +2,47 @@
 
 describe('webserver/configure.js', () => {
   let mockSetHandlers;
-
   let mockLoginLimiter;
-
   let cacheMock;
   let loggerMock;
+  let expressMock;
 
   beforeEach(() => {
     jest.clearAllMocks().resetModules();
 
     mockSetHandlers = jest.fn().mockResolvedValue(true);
-
     mockLoginLimiter = jest.fn().mockReturnValue(true);
+
+    // Create Express app mock
+    expressMock = {
+      post: jest.fn(),
+      use: jest.fn(),
+      get: jest.fn()
+    };
 
     jest.mock('../handlers', () => ({
       setHandlers: mockSetHandlers
     }));
+
+    // Mock WebSocket
+    jest.mock('ws', () => ({
+      Server: jest.fn().mockImplementation(() => ({
+        clients: [],
+        on: jest.fn()
+      }))
+    }));
+
+    // Mock PubSub
+    jest.mock('../../../helpers', () => {
+      const actual = jest.requireActual('../../../helpers');
+      return {
+        ...actual,
+        PubSub: {
+          publish: jest.fn(),
+          subscribe: jest.fn()
+        }
+      };
+    });
   });
 
   describe('when jwt token is not cached', () => {
@@ -30,7 +55,7 @@ describe('webserver/configure.js', () => {
       cacheMock.set = jest.fn().mockReturnValue(true);
 
       const { configureWebServer } = require('../configure');
-      await configureWebServer('app', loggerMock, {
+      await configureWebServer(expressMock, loggerMock, {
         loginLimiter: mockLoginLimiter
       });
     });
@@ -46,8 +71,8 @@ describe('webserver/configure.js', () => {
       );
     });
 
-    it(`triggers setHandlers`, () => {
-      expect(mockSetHandlers).toHaveBeenCalledWith(loggerMock, 'app', {
+    it('triggers setHandlers', () => {
+      expect(mockSetHandlers).toHaveBeenCalledWith(loggerMock, expressMock, {
         loginLimiter: mockLoginLimiter
       });
     });
@@ -63,7 +88,7 @@ describe('webserver/configure.js', () => {
       cacheMock.set = jest.fn().mockReturnValue(true);
 
       const { configureWebServer } = require('../configure');
-      await configureWebServer('app', loggerMock, {
+      await configureWebServer(expressMock, loggerMock, {
         loginLimiter: mockLoginLimiter
       });
     });
