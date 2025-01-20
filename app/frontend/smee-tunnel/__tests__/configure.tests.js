@@ -104,4 +104,69 @@ describe('smee-tunnel/configure', () => {
       expect(smeeTunnel).not.toHaveBeenCalled();
     });
   });
+
+  describe('when local tunnel url is not cached and returned configured domain', () => {
+    beforeEach(async () => {
+      mockCache.hget = jest.fn().mockImplementation((key, field) => {
+        if (key === 'trailing-trade-common' && field === 'smee-tunnel-url') {
+          return undefined;
+        }
+
+        return '';
+      });
+
+      jest.mock('smee-client', () =>
+        jest.fn().mockImplementation(() => ({
+          source: 'https://smee.io/randomchannelid',
+          target: 'http://localhost:value-frontend.port/webhook',
+          logger: mockLogger,
+          start: jest.fn().mockReturnValue({
+            url: 'https://smee.io/randomchannelid'
+          })
+        }))
+      );
+
+      smeeTunnel = require('smee-client');
+
+      const { configureSmeeTunnel } = require('../configure');
+
+      await configureSmeeTunnel(mockLogger);
+      jest.advanceTimersByTime(300 * 1000);
+    });
+
+    it('initialise with expected', () => {
+      expect(smeeTunnel).toHaveBeenCalledWith({
+        source: expect.stringMatching(/^https:\/\/smee\.io\/.{16}$/),
+        target: 'http://localhost:value-frontend.port/webhook',
+        logger: expect.any(Object)
+      });
+    });
+
+    it('triggers cache.hget', () => {
+      expect(mockCache.hget).toHaveBeenCalledWith(
+        'trailing-trade-common',
+        'smee-tunnel-url'
+      );
+    });
+
+    it('triggers cache.hset for tunnel url', () => {
+      expect(mockCache.hset).toHaveBeenCalledWith(
+        'trailing-trade-common',
+        'smee-tunnel-url',
+        expect.stringMatching(/^https:\/\/smee\.io\/.{16}$/)
+      );
+    });
+
+    it('triggers cache.hset for webhook url', () => {
+      expect(mockCache.hset).toHaveBeenCalledWith(
+        'trailing-trade-common',
+        'smee-tunnel-webhook-url',
+        expect.stringMatching(/^https:\/\/smee\.io\/value-frontend\.port$/)
+      );
+    });
+
+    it('calls smeeTunnel only once', () => {
+      expect(smeeTunnel).toHaveBeenCalledTimes(1);
+    });
+  });
 });
