@@ -83,10 +83,14 @@ const connect = async logger => {
   if (cachedLocalTunnelURL !== tunnel.url) {
     // Save config with local tunnel url
     await cache.hset('trailing-trade-common', 'local-tunnel-url', tunnel.url);
-    await cache.hset('trailing-trade-common', 'local-tunnel-webhook-url', webhookUrl);
+    await cache.hset(
+      'trailing-trade-common',
+      'local-tunnel-webhook-url',
+      webhookUrl
+    );
 
     slack.sendMessage(
-      `*Public URL:* ${tunnel.url}\n*Webhook URL:* ${webhookUrl}`, 
+      `*Public URL:* ${tunnel.url}\n*Webhook URL:* ${webhookUrl}`,
       { symbol: 'global' }
     );
     logger.info(

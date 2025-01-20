@@ -10,6 +10,8 @@ It runs on macOS, and Linux environments. I did not test or run this application
 
 You'll need Node.js version 14. To install Node.js, [download the "LTS" installer from nodejs.org](https://nodejs.org). If you're using [`nodenv`](https://github.com/nodenv/nodenv), read the [`nodenv` docs](#nodenv) for instructions on switching Node.js versions.
 
+You will also need Python 3.10.0
+
 In addition, you will need Docker Compose. To install Docker Compose, [refer steps from docker.com](https://docs.docker.com/compose/install/).
 
 Once you've installed Node.js and Docker Compose, open Terminal and run the following:
@@ -97,3 +99,23 @@ Allowed types are:
 - `revert`
 - `style`
 - `test`
+
+## To-Do List
+
+Here are the tasks planned for the application:
+
+- [x] Setup project structure and initialize repository
+- [ ] Design and implement backend API using **FastAPI**
+- [ ] Learn asynchronous task handling
+- [ ] Edit alerts in trading view to send json objects
+- [ ] Handle json objects in the backend
+- [ ] Setup database for handling alerts
+- [ ] Add binance client for cross margin
+- [ ] Add algo for placing buy and sell trades
+- [ ] Integrate alerts into trade algo
+- [ ] Implement CPU performance analysis using **Psutil** and **Asyncio**
+- [ ] Create CLI interface using **Typer**
+- [ ] Write unit and integration tests
+- [ ] Deploy application to production environment
+- [ ] Update documentation and user guides
+- [ ] Rewrite using typescript and latest node.js

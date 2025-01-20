@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
-const { PubSub, cache, mongo } = require('../../helpers');
 const WebSocket = require('ws');
 const config = require('config');
+const { PubSub, cache, mongo } = require('../../helpers');
 
 const { setHandlers } = require('./handlers');
 
@@ -15,7 +15,6 @@ const configureJWTToken = async () => {
 
   return jwtSecret;
 };
-
 
 const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
   const logger = funcLogger.child({ server: 'webserver' });
@@ -46,8 +45,8 @@ const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
 
     // Save alert to MongoDB
     await mongo.insertOne(requestLogger, 'tradingview-alerts', {
-      ...alert,
-      receivedAt: new Date(),
+    ...alert,
+      receivedAt: new Date()
     });
 
     // Cache the latest alert in Redis

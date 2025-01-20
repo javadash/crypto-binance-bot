@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable no-undef */
 
@@ -64,8 +63,7 @@ class App extends React.Component {
       page: 1,
       totalPages: 1,
       tradingViewIntervals: ['1m', '5m', '15m', '30m', '1h', '2h', '4h', '1d'],
-      tradingViews: [],
-      latestAlert: null
+      tradingViews: []
     };
     this.requestLatest = this.requestLatest.bind(this);
     this.connectWebSocket = this.connectWebSocket.bind(this);
@@ -147,6 +145,7 @@ class App extends React.Component {
   }
 
   toast({ type, title }) {
+    // this.notyf.dismissAll();
     if (type !== 'warning' && type !== 'error') {
       if (title.toLowerCase().includes('buy ')) {
         type = 'buy';
@@ -162,32 +161,32 @@ class App extends React.Component {
   }
 
   connectWebSocket() {
-    // Store WebSocket instance in a variable first
-    let ws = null;
-    try {
-      ws = new WebSocket(config.webSocketUrl);
-    } catch (err) {
-      console.error('Failed to create WebSocket connection:', err);
-      return;
-    }
+    const instance = new WebSocket(config.webSocketUrl);
 
-    // Set up handlers before setting state
-    ws.onopen = () => {
+    this.setState(prevState => ({
+      webSocket: {
+        ...prevState.webSocket,
+        instance
+      }
+    }));
+
+    const self = this;
+
+    instance.onopen = () => {
       console.log('Connection is successfully established.');
       this.toast({
         type: 'success',
         title: 'Connected to the bot.'
       });
-      this.setState(prevState => ({
+      self.setState(prevState => ({
         webSocket: {
           ...prevState.webSocket,
-          connected: true,
-          instance: ws
+          connected: true
         }
       }));
     };
 
-    ws.onmessage = (evt => {
+    instance.onmessage = evt => {
       let response = {};
       try {
         response = JSON.parse(evt.data);
@@ -195,7 +194,7 @@ class App extends React.Component {
 
       if (response.type === 'latest') {
         // Set states
-        this.setState({
+        self.setState({
           isLoaded: true,
           isAuthenticated: response.isAuthenticated,
           botOptions: response.botOptions,
@@ -230,8 +229,7 @@ class App extends React.Component {
             0
           ),
           totalPages: _.get(response, ['common', 'totalPages'], 1),
-          tradingViews: _.get(response, ['stats', 'tradingViews'], []),
-          latestAlert: response.latestAlert
+          tradingViews: _.get(response, ['stats', 'tradingViews'], [])
         });
       }
 
@@ -242,59 +240,37 @@ class App extends React.Component {
         });
       }
 
-      if (response.type === 'tradingview-alert') {
-        const alert = response.data;
-        // Show toast notification
-        this.toast({
-          type: alert.order_action.toLowerCase() === 'buy' ? 'buy' : 'sell',
-          title: `New Alert: ${alert.order_action} ${alert.ticker} at ${alert.bar.close}`
-        });
-        // Update the latest alert in the state
-        this.setState({ latestAlert: alert });
-      }
-
       if (response.type === 'dust-transfer-get-result') {
-        this.setState({
+        self.setState({
           dustTransfer: response.dustTransfer
         });
       }
 
       if (response.type === 'exchange-symbols-get-result') {
-        this.setState({
+        self.setState({
           exchangeSymbols: response.exchangeSymbols
         });
       }
-    }).bind(this);
+    };
 
-    ws.onclose = () => {
+    instance.onclose = () => {
       console.log('Socket is closed. Reconnect will be attempted in 1 second.');
+
       this.toast({
         type: 'info',
         title: 'Disconnected from the bot. Reconnecting...'
       });
-      this.setState(prevState => ({
+      self.setState(prevState => ({
         webSocket: {
           ...prevState.webSocket,
-          connected: false,
-          instance: null
+          connected: false
         }
       }));
 
-      // Only attempt reconnect if component is still mounted
-      if (this._isMounted) {
-        setTimeout(() => {
-          this.connectWebSocket();
-        }, 1000);
-      }
+      setTimeout(function () {
+        self.connectWebSocket();
+      }, 1000);
     };
-
-    // Set initial state with WebSocket instance
-    this.setState(prevState => ({
-      webSocket: {
-        ...prevState.webSocket,
-        instance: ws
-      }
-    }));
   }
 
   isAccountLoaded() {
@@ -356,7 +332,6 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this._isMounted = true;
     let selectedSortOption = {
       sortBy: 'default',
       sortByDesc: false,
@@ -383,17 +358,10 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
-    if (this.state.webSocket.instance) {
-      this.state.webSocket.instance.close();
-    }
-    if (this.timerID) {
-      clearInterval(this.timerID);
-    }
+    clearInterval(this.timerID);
   }
 
   render() {
-
     const {
       webSocket: { connected },
       packageVersion,
@@ -420,8 +388,7 @@ class App extends React.Component {
       page,
       totalPages,
       tradingViewIntervals,
-      tradingViews,
-      latestAlert
+      tradingViews
     } = this.state;
 
     if (isLoaded === false) {
@@ -588,7 +555,6 @@ class App extends React.Component {
           </div>
         )}
 
-        <LatestAlert alert={latestAlert} />
         <Footer packageVersion={packageVersion} gitHash={gitHash} />
       </React.Fragment>
     );

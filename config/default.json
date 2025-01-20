@@ -41,6 +41,10 @@
     "enabled": true,
     "subdomain": "default"
   },
+  "smeeTunnel": {
+    "enabled": true,
+    "subdomain": "johnsonbtvbot"
+  },
   "featureToggle": {
     "notifyOrderConfirm": true,
     "notifyDebug": false,

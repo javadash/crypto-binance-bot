@@ -62,6 +62,13 @@
     },
     "subdomain": "BINANCE_LOCAL_TUNNEL_SUBDOMAIN"
   },
+  "smeeTunnel": {
+    "enabled": {
+      "__name": "BINANCE_SMEE_TUNNEL_ENABLED",
+      "__format": "boolean"
+    },
+    "subdomain": "BINANCE_SMEE_TUNNEL_SUBDOMAIN"
+  },
   "featureToggle": {
     "notifyOrderConfirm": {
       "__name": "BINANCE_FEATURE_TOGGLE_NOTIFY_ORDER_CONFIRM",

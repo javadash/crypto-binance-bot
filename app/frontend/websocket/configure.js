@@ -53,7 +53,7 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
         client.send(
           JSON.stringify({
             type: 'tradingview-alert',
-            data,
+            data
           })
         );
       }
@@ -69,7 +69,7 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
         client.send(
           JSON.stringify({
             type: 'tradingview-alert',
-            data,
+            data
           })
         );
       }
@@ -149,10 +149,13 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
     });
 
     // Get latest alert synchronously and handle it with callback
-    cache.hget('tradingview', 'latest-alert')
+    cache
+      .hget('tradingview', 'latest-alert')
       .then(latestAlertJSON => {
-        const latestAlert = latestAlertJSON ? JSON.parse(latestAlertJSON) : null;
-        
+        const latestAlert = latestAlertJSON
+          ? JSON.parse(latestAlertJSON)
+          : null;
+
         ws.send(
           JSON.stringify({
             result: true,

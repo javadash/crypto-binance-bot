@@ -25,6 +25,7 @@ const loginLimiter = new RateLimiterRedis({
 const { configureWebServer } = require('./frontend/webserver/configure');
 const { configureWebSocket } = require('./frontend/websocket/configure');
 const { configureLocalTunnel } = require('./frontend/local-tunnel/configure');
+const { configureSmeeTunnel } = require('./frontend/smee-tunnel/configure');
 
 const runFrontend = async serverLogger => {
   const logger = serverLogger.child({ server: 'frontend' });
@@ -80,6 +81,7 @@ const runFrontend = async serverLogger => {
   await configureWebServer(app, logger, { loginLimiter });
   await configureWebSocket(server, logger, { loginLimiter });
   await configureLocalTunnel(logger);
+  await configureSmeeTunnel(logger);
 };
 
 module.exports = { runFrontend };
