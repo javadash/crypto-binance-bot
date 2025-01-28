@@ -77,6 +77,35 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
   });
 
   wss.on('connection', ws => {
+    // Send connection success message immediately when connected
+    cache
+      .hget('tradingview', 'latest-alert')
+      .then(latestAlertJSON => {
+        const latestAlert = latestAlertJSON
+          ? JSON.parse(latestAlertJSON)
+          : null;
+
+        ws.send(
+          JSON.stringify({
+            result: true,
+            type: 'connection_success',
+            message: 'You are successfully connected to WebSocket.',
+            latestAlert
+          })
+        );
+      })
+      .catch(err => {
+        logger.error({ err }, 'Failed to get latest alert');
+        ws.send(
+          JSON.stringify({
+            result: true,
+            type: 'connection_success',
+            message: 'You are successfully connected to WebSocket.',
+            latestAlert: null
+          })
+        );
+      });
+
     ws.on('message', async message => {
       // eslint-disable-next-line no-underscore-dangle
       const clientIp = ws._socket.remoteAddress;
@@ -148,34 +177,6 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
       await commandMaps[payload.command](commandLogger, ws, payload);
     });
 
-    // Get latest alert synchronously and handle it with callback
-    cache
-      .hget('tradingview', 'latest-alert')
-      .then(latestAlertJSON => {
-        const latestAlert = latestAlertJSON
-          ? JSON.parse(latestAlertJSON)
-          : null;
-
-        ws.send(
-          JSON.stringify({
-            result: true,
-            type: 'connection_success',
-            message: 'You are successfully connected to WebSocket.',
-            latestAlert
-          })
-        );
-      })
-      .catch(err => {
-        logger.error({ err }, 'Failed to get latest alert');
-        ws.send(
-          JSON.stringify({
-            result: true,
-            type: 'connection_success',
-            message: 'You are successfully connected to WebSocket.',
-            latestAlert: null
-          })
-        );
-      });
 
     PubSub.subscribe('frontend-notification', async (message, data) => {
       logger.info(

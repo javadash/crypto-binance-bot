@@ -45,7 +45,7 @@ const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
 
     // Save alert to MongoDB
     await mongo.insertOne(requestLogger, 'tradingview-alerts', {
-    ...alert,
+      ...alert,
       receivedAt: new Date()
     });
 
@@ -86,6 +86,7 @@ const configureWebServer = async (app, funcLogger, { loginLimiter }) => {
   });
 
   await setHandlers(logger, app, { loginLimiter });
+  return true;
 };
 
 module.exports = { configureWebServer };

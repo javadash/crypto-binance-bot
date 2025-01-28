@@ -74,10 +74,6 @@ const connect = async logger => {
 
   // Create webhook URL by appending /webhook to the tunnel URL
   const webhookUrl = `${tunnel.url}/webhook`;
-  const cachedWebhookURL = await cache.hget(
-    'trailing-trade-common',
-    'local-tunnel-webhook-url'
-  );
 
   // If new url is different, then notify slack
   if (cachedLocalTunnelURL !== tunnel.url) {
