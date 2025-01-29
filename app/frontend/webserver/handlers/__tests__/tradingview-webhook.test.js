@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
 describe('tradingview-webhook.js', () => {
-  let mockConfig;
+  let config;
   let mockMongo;
   let mockCache;
   let mockPubSub;
@@ -10,35 +10,34 @@ describe('tradingview-webhook.js', () => {
   beforeEach(() => {
     jest.clearAllMocks().resetModules();
 
-    // Mock config
-    mockConfig = {
-      get: jest.fn(key => {
-        if (key === 'tradingView.passphrase') {
+    // Mock modules BEFORE any requires
+    config = require('config');
+    jest.mock('config');
+
+    config.get = jest.fn(key => {
+      switch (key) {
+        case 'tradingView.passphrase':
           return 'valid-passphrase';
-        }
-        return null;
-      })
-    };
+        default:
+          return `value-${key}`;
+      }
+    });
 
-    // Mock mongo
-    mockMongo = {
-      insertOne: jest.fn().mockResolvedValue(true)
-    };
+    // Get mocked modules
+    const { mongo, cache, PubSub } = require('../../../../helpers');
+    mockMongo = mongo;
+    mockCache = cache;
+    mockPubSub = PubSub;
 
-    // Mock cache
-    mockCache = {
-      hset: jest.fn().mockResolvedValue(true)
-    };
-
-    // Mock PubSub
-    mockPubSub = {
-      publish: jest.fn().mockReturnValue(true)
-    };
+    mongo.insertOne = jest.fn().mockResolvedValue(true);
+    mockCache.hset = jest.fn().mockResolvedValue(true);
+    mockCache.hdel = jest.fn().mockResolvedValue(true);
+    mockPubSub.publish = jest.fn().mockResolvedValue(true);
 
     // Mock Express app
     mockApp = {
       post: jest.fn().mockImplementation((path, handler) => {
-        this.handler = handler;
+        mockApp.handler = handler;
         return mockApp;
       })
     };
@@ -54,21 +53,15 @@ describe('tradingview-webhook.js', () => {
         error: jest.fn()
       })
     };
-
-    // Mock modules
-    jest.mock('config', () => mockConfig);
-    jest.mock('../../../helpers', () => ({
-      mongo: mockMongo,
-      cache: mockCache,
-      PubSub: mockPubSub
-    }));
   });
 
   describe('handleTradingViewWebhook', () => {
     let handleTradingViewWebhook;
 
     beforeEach(async () => {
-      const { handleTradingViewWebhook: handle } = require('../tradingview-webhook');
+      const {
+        handleTradingViewWebhook: handle
+      } = require('../tradingview-webhook');
       handleTradingViewWebhook = handle;
 
       await handleTradingViewWebhook(mockLogger, mockApp);

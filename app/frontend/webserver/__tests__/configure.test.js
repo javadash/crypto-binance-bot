@@ -1,4 +1,4 @@
-s/* eslint-disable global-require */
+/* eslint-disable global-require */
 
 describe('webserver/configure.js', () => {
   let mockSetHandlers;

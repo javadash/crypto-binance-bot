@@ -9,6 +9,7 @@ const { handleSymbolDelete } = require('./symbol-delete');
 const { handleBackupGet } = require('./backup-get');
 const { handleRestorePost } = require('./restore-post');
 const { handle404 } = require('./404');
+const { handleTradingViewWebhook } = require('./tradingview-webhook');
 
 const setHandlers = async (logger, app, { loginLimiter }) => {
   await handleAuth(logger, app, { loginLimiter });
@@ -22,6 +23,7 @@ const setHandlers = async (logger, app, { loginLimiter }) => {
   await handleBackupGet(logger, app);
   await handleRestorePost(logger, app);
   await handle404(logger, app);
+  await handleTradingViewWebhook(logger, app);
 };
 
 module.exports = {

@@ -23,9 +23,14 @@ const connect = async smeeLogger => {
 
   smeeLogger.info('Attempt connecting smee tunnel');
 
-  // Generate smee channel URL
-  const channelId = generateChannelId();
-  const smeeUrl = `https://smee.io/${channelId}`;
+  // Check if we have an existing tunnel URL
+  const existingSmeeUrl = await cache.hget(
+    'trailing-trade-common',
+    'smee-tunnel-url'
+  );
+
+  // Use existing URL or generate new one
+  const smeeUrl = existingSmeeUrl || `https://smee.io/${generateChannelId()}`;
 
   // Generate smee channel URL with predefine route
   const defaultChannel = config.get('frontend.port');

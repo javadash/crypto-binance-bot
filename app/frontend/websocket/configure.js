@@ -1,10 +1,12 @@
 const { v4: uuidv4 } = require('uuid');
 const WebSocket = require('ws');
 const config = require('config');
-const { cache, PubSub } = require('../../helpers');
+
 const {
   verifyAuthenticated
 } = require('../../cronjob/trailingTradeHelper/common');
+
+const { PubSub } = require('../../helpers');
 
 const {
   handleLatest,
@@ -44,68 +46,7 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
     noServer: true
   });
 
-  PubSub.subscribe('tradingview-alert', (message, data) => {
-    logger.info({ data }, 'Publishing tradingview-alert to frontend');
-
-    // Broadcast to all connected clients
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
-        client.send(
-          JSON.stringify({
-            type: 'tradingview-alert',
-            data
-          })
-        );
-      }
-    });
-  });
-
-  PubSub.subscribe('tradingview-alert', (message, data) => {
-    logger.info({ data }, 'Publishing tradingview-alert to frontend');
-
-    // Broadcast to all connected clients
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN && client.isAuthenticated) {
-        client.send(
-          JSON.stringify({
-            type: 'tradingview-alert',
-            data
-          })
-        );
-      }
-    });
-  });
-
   wss.on('connection', ws => {
-    // Send connection success message immediately when connected
-    cache
-      .hget('tradingview', 'latest-alert')
-      .then(latestAlertJSON => {
-        const latestAlert = latestAlertJSON
-          ? JSON.parse(latestAlertJSON)
-          : null;
-
-        ws.send(
-          JSON.stringify({
-            result: true,
-            type: 'connection_success',
-            message: 'You are successfully connected to WebSocket.',
-            latestAlert
-          })
-        );
-      })
-      .catch(err => {
-        logger.error({ err }, 'Failed to get latest alert');
-        ws.send(
-          JSON.stringify({
-            result: true,
-            type: 'connection_success',
-            message: 'You are successfully connected to WebSocket.',
-            latestAlert: null
-          })
-        );
-      });
-
     ws.on('message', async message => {
       // eslint-disable-next-line no-underscore-dangle
       const clientIp = ws._socket.remoteAddress;
@@ -177,6 +118,13 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
       await commandMaps[payload.command](commandLogger, ws, payload);
     });
 
+    ws.send(
+      JSON.stringify({
+        result: true,
+        type: 'connection_success',
+        message: 'You are successfully connected to WebSocket.'
+      })
+    );
 
     PubSub.subscribe('frontend-notification', async (message, data) => {
       logger.info(

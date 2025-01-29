@@ -2,6 +2,9 @@
 describe('index', () => {
   let index;
 
+  let mockLogger;
+  let mockApp;
+
   let mockHandleAuth;
   let mockHandleGridTradeArchiveGet;
   let mockHandleGridTradeArchiveDelete;
@@ -19,6 +22,21 @@ describe('index', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks().resetModules();
+
+    // Add this to get the mocked logger
+    const { logger } = require('../../../../helpers');
+    mockLogger = logger;
+
+    mockApp = {
+      post: jest.fn(),
+      use: jest.fn(),
+      get: jest.fn(),
+      route: jest.fn().mockReturnValue({
+        post: jest.fn(),
+        get: jest.fn(),
+        delete: jest.fn()
+      })
+    };
 
     mockHandleAuth = jest.fn().mockResolvedValue(true);
     mockHandleGridTradeArchiveGet = jest.fn().mockResolvedValue(true);
@@ -80,60 +98,69 @@ describe('index', () => {
     }));
 
     index = require('../index');
-    await index.setHandlers('logger', 'app', {
+    await index.setHandlers(mockLogger, mockApp, {
       loginLimiter: mockLoginLimiter
     });
   });
 
   it('triggers handleAuth', () => {
-    expect(mockHandleAuth).toHaveBeenCalledWith('logger', 'app', {
+    expect(mockHandleAuth).toHaveBeenCalledWith(mockLogger, mockApp, {
       loginLimiter: mockLoginLimiter
     });
   });
 
   it('triggers handleGridTradeArchiveGet', () => {
-    expect(mockHandleGridTradeArchiveGet).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleGridTradeArchiveGet).toHaveBeenCalledWith(
+      mockLogger,
+      mockApp
+    );
   });
 
   it('triggers handleGridTradeArchiveDelete', () => {
     expect(mockHandleGridTradeArchiveDelete).toHaveBeenCalledWith(
-      'logger',
-      'app'
+      mockLogger,
+      mockApp
     );
   });
 
   it('triggers handleClosedTradesSetPeriod', () => {
     expect(mockHandleClosedTradesSetPeriod).toHaveBeenCalledWith(
-      'logger',
-      'app'
+      mockLogger,
+      mockApp
     );
   });
 
   it('triggers handleGridTradeLogsGet', () => {
-    expect(mockHandleGridTradeLogsGet).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleGridTradeLogsGet).toHaveBeenCalledWith(
+      mockLogger,
+      mockApp
+    );
   });
 
   it('triggers handleGridTradeLogsExport', () => {
-    expect(mockHandleGridTradeLogsExport).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleGridTradeLogsExport).toHaveBeenCalledWith(
+      mockLogger,
+      mockApp
+    );
   });
 
   it('triggers handleStatus', () => {
-    expect(mockHandleStatus).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleStatus).toHaveBeenCalledWith(mockLogger, mockApp);
   });
 
   it('triggers handle404', () => {
-    expect(mockHandle404).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandle404).toHaveBeenCalledWith(mockLogger, mockApp);
   });
 
   it('triggers handleSymbolDelete', () => {
-    expect(mockHandleSymbolDelete).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleSymbolDelete).toHaveBeenCalledWith(mockLogger, mockApp);
   });
 
   it('triggers handleBackupGet', () => {
-    expect(mockHandleBackupGet).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleBackupGet).toHaveBeenCalledWith(mockLogger, mockApp);
   });
 
   it('triggers handleRestorePost', () => {
-    expect(mockHandleRestorePost).toHaveBeenCalledWith('logger', 'app');
+    expect(mockHandleRestorePost).toHaveBeenCalledWith(mockLogger, mockApp);
   });
 });
