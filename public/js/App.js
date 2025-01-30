@@ -190,7 +190,9 @@ class App extends React.Component {
       let response = {};
       try {
         response = JSON.parse(evt.data);
-      } catch (_e) {}
+      } catch (_e) {
+        console.error('Failed to parse websocket message:', evt.data);
+      }
 
       if (response.type === 'latest') {
         // Set states

@@ -131,11 +131,16 @@ const configureWebSocket = async (server, funcLogger, { loginLimiter }) => {
         { tag: 'frontend-notification' },
         `Message: ${message}, Data: ${data}`
       );
+
+      const notification = typeof data === 'string' ? JSON.parse(data) : data;
+
+      logger.info({ notification }, 'Sending notification to websocket');
+
       ws.send(
         JSON.stringify({
           result: true,
           type: 'notification',
-          message: data
+          message: notification
         })
       );
     });

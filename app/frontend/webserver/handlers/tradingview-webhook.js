@@ -12,7 +12,10 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
 
     // Validate passphrase
     const incomingPassphrase = req.body.passphrase;
-    const expectedPassphrase = config.get('tradingView.passphrase');
+
+    //const expectedPassphrase = config.get('tradingView.passphrase');
+
+    const expectedPassphrase = 'LlbqS6wEVlCOza8Z47UKRz83ZaGiiQD9';
 
     if (incomingPassphrase !== expectedPassphrase) {
       logger.warn('Invalid passphrase in webhook request');
@@ -37,8 +40,18 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
         3600 // Cache for 1 hour
       );
 
+      const notification = {
+        type: alert.title.toLowerCase(),
+        title: `${alert.title} signal for ${alert.ticker} at ${alert.bar.close}`
+      };
+
+      logger.info(
+        { notification: JSON.stringify(notification) },
+        'Publishing notification'
+      );
+
       // Publish event for WebSocket notifications
-      PubSub.publish('tradingview-alert', JSON.stringify(alert));
+      PubSub.publish('frontend-notification', notification);
 
       res.status(200).json({ success: true, message: 'Alert received' });
     } catch (err) {

@@ -119,3 +119,4 @@ Here are the tasks planned for the application:
 - [ ] Deploy application to production environment
 - [ ] Update documentation and user guides
 - [ ] Rewrite using typescript and latest node.js
+- [ ] Switch messenger to telegram
