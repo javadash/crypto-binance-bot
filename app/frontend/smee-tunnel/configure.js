@@ -32,8 +32,8 @@ const connect = async smeeLogger => {
   // Use existing URL or generate new one
   const smeeUrl = existingSmeeUrl || `https://smee.io/${generateChannelId()}`;
 
-  // Generate smee channel URL with predefine route
-  const defaultChannel = config.get('frontend.port');
+  // Generate smee channel URL with predefined route
+  const defaultChannel = config.get('smeeTunnel.subdomain');
   const cachedWebhookURL = `https://smee.io/${defaultChannel}`;
 
   // Configure target URL
@@ -54,7 +54,6 @@ const connect = async smeeLogger => {
 
   smeeLogger.info({ url: smeeUrl }, 'Connected smee tunnel');
 
-  // Save URLs to cache
   await cache.hset('trailing-trade-common', 'smee-tunnel-url', smeeUrl);
   await cache.hset(
     'trailing-trade-common',
