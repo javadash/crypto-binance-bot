@@ -1,6 +1,6 @@
 {
   "mode": "test",
-  "tz": "Australia/Melbourne",
+  "tz": "Europe/London",
   "appName": "Binance Trading Bot",
   "demoMode": false,
   "frontend": {
@@ -48,7 +48,8 @@
   "featureToggle": {
     "notifyOrderConfirm": true,
     "notifyDebug": false,
-    "notifyOrderExecute": true
+    "notifyOrderExecute": true,
+    "trailingTradeExecute": true
   },
   "authentication": {
     "enabled": true,
@@ -67,7 +68,9 @@
     "trailingTrade": {
       "enabled": true,
       "cronTime": "* * * * * *",
-      "symbols": ["BTCUSDT", "XRPUSDT", "SOLUSDT", "DOGEUSDT"],
+      "symbols": [
+        "XRPUSDT"
+      ],
       "botOptions": {
         "authentication": {
           "lockList": true,
@@ -115,7 +118,7 @@
         "limit": 100
       },
       "buy": {
-        "enabled": true,
+        "enabled": false,
         "gridTrade": [
           {
             "triggerPercentage": 1,
@@ -139,7 +142,7 @@
         }
       },
       "sell": {
-        "enabled": true,
+        "enabled": false,
         "gridTrade": [
           {
             "triggerPercentage": 1.06,

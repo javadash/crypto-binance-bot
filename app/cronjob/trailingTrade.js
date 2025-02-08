@@ -31,6 +31,17 @@ const execute = async (rawLogger, symbol, correlationId = uuidv4()) => {
     symbol
   });
 
+  // Check if trailingTradeExecute is enabled
+  if (config.get('featureToggle.trailingTradeExecute') === false) {
+    logger.info(
+      {
+        trailingTradeExecute: config.get('featureToggle.trailingTradeExecute')
+      },
+      'Trailing Trade execution is disabled. Exiting...'
+    );
+    return;
+  }
+
   await errorHandlerWrapper(logger, 'Trailing Trade', async () => {
     logger.info({ debug: true }, '▶ TrailingTrade: Start process...');
 

@@ -120,3 +120,4 @@ Here are the tasks planned for the application:
 - [ ] Update documentation and user guides
 - [ ] Rewrite using typescript and latest node.js
 - [ ] Switch messenger to telegram
+- [ ] Working on strategy

@@ -39,9 +39,10 @@ const setupTickersWebsocket = async (logger, symbols) => {
       logger.info(
         `Existing opened stream for ${monitoringSymbol} ticker found, clean first`
       );
-      websocketTickersClean[monitoringSymbol]();
+      websocketTickersClean[monitoringSymbol](); // clean websocket
     }
 
+    // Open new websocket
     websocketTickersClean[monitoringSymbol] = binance.client.ws.miniTicker(
       monitoringSymbol,
       ticker => {

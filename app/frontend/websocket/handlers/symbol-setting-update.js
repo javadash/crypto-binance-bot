@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const {
+  getGlobalConfiguration,
   getSymbolConfiguration,
   saveSymbolConfiguration
 } = require('../../../cronjob/trailingTradeHelper/configuration');
@@ -30,16 +31,16 @@ const handleSymbolSettingUpdate = async (logger, ws, payload) => {
       _.omit(b, 'executed', 'executedOrder')
     );
 
-    symbolConfiguration.buy = _.omit(
-      buy,
-      'currentGridTradeIndex',
-      'currentGridTrade'
-    );
-    symbolConfiguration.sell = _.omit(
-      sell,
-      'currentGridTradeIndex',
-      'currentGridTrade'
-    );
+    // Override buy.enabled and sell.enabled with global configuration
+    const globalConfiguration = await getGlobalConfiguration(logger);
+    symbolConfiguration.buy = {
+      ..._.omit(buy, 'currentGridTradeIndex', 'currentGridTrade'),
+      enabled: globalConfiguration.buy.enabled // Use global setting
+    };
+    symbolConfiguration.sell = {
+      ..._.omit(sell, 'currentGridTradeIndex', 'currentGridTrade'),
+      enabled: globalConfiguration.sell.enabled // Use global setting
+    };
     symbolConfiguration.botOptions = botOptions;
 
     logger.info({ symbolConfiguration }, 'Updated symbol configuration');

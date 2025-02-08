@@ -472,12 +472,33 @@ class SettingIcon extends React.Component {
                             controlId='field-buy-enabled'
                             className='mb-2'>
                             <Form.Check size='sm'>
-                              <Form.Check.Input
+                              {/* <Form.Check.Input
                                 type='checkbox'
                                 data-state-key='buy.enabled'
                                 checked={configuration.buy.enabled}
                                 onChange={this.handleInputChange}
-                              />
+                              /> */}
+                              <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                  <Popover id='buy-enabled-disabled-tooltip'>
+                                    <Popover.Content>
+                                      This setting is controlled globally and
+                                      cannot be changed here.See global settings
+                                      commit to revert this change.
+                                    </Popover.Content>
+                                  </Popover>
+                                }>
+                                <span>
+                                  <Form.Check.Input
+                                    type='checkbox'
+                                    data-state-key='buy.enabled'
+                                    checked={configuration.buy.enabled}
+                                    onChange={this.handleInputChange}
+                                    disabled
+                                  />
+                                </span>
+                              </OverlayTrigger>
                               <Form.Check.Label>
                                 Trading Enabled{' '}
                                 <OverlayTrigger
@@ -784,12 +805,33 @@ class SettingIcon extends React.Component {
                             controlId='field-sell-enabled'
                             className='mb-2'>
                             <Form.Check size='sm'>
-                              <Form.Check.Input
+                              {/* <Form.Check.Input
                                 type='checkbox'
                                 data-state-key='sell.enabled'
                                 checked={configuration.sell.enabled}
                                 onChange={this.handleInputChange}
-                              />
+                              /> */}
+                              <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                  <Popover id='sell-enabled-disabled-tooltip'>
+                                    <Popover.Content>
+                                      This setting is controlled globally and
+                                      cannot be changed here.See global settings
+                                      commit to revert this change.
+                                    </Popover.Content>
+                                  </Popover>
+                                }>
+                                <span>
+                                  <Form.Check.Input
+                                    type='checkbox'
+                                    data-state-key='sell.enabled'
+                                    checked={configuration.sell.enabled}
+                                    onChange={this.handleInputChange}
+                                    disabled
+                                  />
+                                </span>
+                              </OverlayTrigger>
                               <Form.Check.Label>
                                 Trading Enabled{' '}
                                 <OverlayTrigger

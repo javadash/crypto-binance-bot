@@ -84,6 +84,11 @@
       "__name": "BINANCE_FEATURE_TOGGLE_NOTIFY_ORDER_EXECUTE",
       "__description": "Set a boolean to notify the order executed messages. Note that enabling this feature toggle can flood the messages.",
       "__format": "boolean"
+    },
+    "trailingTradeExecute": {
+      "__name": "BINANCE_FEATURE_TOGGLE_TRAILING_TRADE_ENABLED",
+      "__description": "Set a boolean to enable or disable trailing trade execution",
+      "__format": "boolean"
     }
   },
   "authentication": {
