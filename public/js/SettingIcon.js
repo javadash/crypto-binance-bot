@@ -158,6 +158,8 @@ class SettingIcon extends React.Component {
         ? +target.value
         : target.value;
     const stateKey = target.getAttribute('data-state-key');
+    console.log(target);
+    console.log(stateKey);
 
     const { configuration } = this.state;
 

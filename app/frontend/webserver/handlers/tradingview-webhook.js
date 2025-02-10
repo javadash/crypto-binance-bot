@@ -1,5 +1,7 @@
 const config = require('config');
 const { mongo, cache, PubSub } = require('../../../helpers');
+const { buildAutomaticTradePayload } = require('./tradingview-payload-build');
+const { handleAutomaticTrade } = require('./automatic-trade');
 
 const handleTradingViewWebhook = async (funcLogger, app) => {
   const logger = funcLogger.child({
@@ -15,6 +17,7 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
 
     //const expectedPassphrase = config.get('tradingView.passphrase');
 
+    //TODO
     const expectedPassphrase = 'LlbqS6wEVlCOza8Z47UKRz83ZaGiiQD9';
 
     if (incomingPassphrase !== expectedPassphrase) {
@@ -23,7 +26,17 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
       return;
     }
 
-    const alert = req.body;
+    const {
+      exchange = null,
+      ticker = null,
+      bar = null,
+      strategy = null,
+      side = null
+    } = req.body;
+
+    const alert = { exchange, ticker, bar, strategy, side };
+
+    const tradePayload = buildAutomaticTradePayload(logger, alert);
 
     try {
       // Save alert to MongoDB
@@ -33,16 +46,11 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
       });
 
       // Cache the latest alert
-      await cache.hset(
-        'tradingview',
-        'latest-alert',
-        JSON.stringify(alert),
-        3600 // Cache for 1 hour
-      );
+      await cache.hset('tradingview', 'latest-alert', JSON.stringify(alert));
 
       const notification = {
-        type: alert.title.toLowerCase(),
-        title: `${alert.title} signal for ${alert.ticker} at ${alert.bar.close}`
+        type: alert.side.toLowerCase(),
+        title: `${alert.side} signal for ${alert.ticker} at ${alert.bar.close}`
       };
 
       logger.info(
@@ -50,8 +58,10 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
         'Publishing notification'
       );
 
-      // Publish event for WebSocket notifications
       PubSub.publish('frontend-notification', notification);
+
+
+      await handleAutomaticTrade(logger, null, tradePayload);
 
       res.status(200).json({ success: true, message: 'Alert received' });
     } catch (err) {
