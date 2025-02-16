@@ -205,7 +205,7 @@ class SymbolManualTradeIcon extends React.Component {
     quoteAssetBalance,
     currentPrice,
     percentage,
-    filterPrice,
+    filterLotSize,
     baseAssetStepSize
   }) {
     const quoteAssetBalanceFree = parseFloat(quoteAssetBalance.free);
@@ -215,8 +215,8 @@ class SymbolManualTradeIcon extends React.Component {
       baseAssetStepSize
     );
 
-    if (parseFloat(newAmount) > parseFloat(filterPrice.maxPrice)) {
-      newAmount = parseFloat(filterPrice.maxPrice).toFixed(baseAssetStepSize);
+    if (parseFloat(newAmount) > parseFloat(filterLotSize.maxQty)) {
+      newAmount = parseFloat(filterLotSize.maxQty).toFixed(baseAssetStepSize);
     }
 
     return parseFloat(newAmount);
@@ -347,7 +347,7 @@ class SymbolManualTradeIcon extends React.Component {
         quoteAssetBalance,
         currentPrice: parseFloat(orderParams.price),
         percentage,
-        filterPrice,
+        filterLotSize,
         baseAssetStepSize
       });
     } else if (orderParams.type === 'limit' && side === 'sell') {

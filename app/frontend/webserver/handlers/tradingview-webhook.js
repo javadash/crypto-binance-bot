@@ -1,7 +1,6 @@
 const config = require('config');
 const { mongo, cache, PubSub } = require('../../../helpers');
 const { buildAutomaticTradePayload } = require('./tradingview-payload-build');
-const { handleAutomaticTrade } = require('./automatic-trade');
 
 const handleTradingViewWebhook = async (funcLogger, app) => {
   const logger = funcLogger.child({
@@ -36,7 +35,8 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
 
     const alert = { exchange, ticker, bar, strategy, side };
 
-    const tradePayload = buildAutomaticTradePayload(logger, alert);
+    const tradePayload = await buildAutomaticTradePayload(logger, alert);
+    console.log(tradePayload);
 
     try {
       // Save alert to MongoDB
@@ -59,9 +59,6 @@ const handleTradingViewWebhook = async (funcLogger, app) => {
       );
 
       PubSub.publish('frontend-notification', notification);
-
-
-      await handleAutomaticTrade(logger, null, tradePayload);
 
       res.status(200).json({ success: true, message: 'Alert received' });
     } catch (err) {

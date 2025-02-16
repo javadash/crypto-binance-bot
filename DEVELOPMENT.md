@@ -121,3 +121,9 @@ Here are the tasks planned for the application:
 - [ ] Rewrite using typescript and latest node.js
 - [ ] Switch messenger to telegram
 - [ ] Working on strategy
+- [ ] Fix the passphrase in smeetunnel
+- [ ] Fix the smee unit test
+- [ ] Fix all jest test
+- [ ] Fix the creation of payload with Market trades - market trade - see payload "marketQuantity": 50, & "quoteOrderQty": 100 are filled and the same
+- [ ] Fix the creation of payload with Market trades - market trade - see payload
+- [ ] Fix the use of Notional

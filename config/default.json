@@ -69,7 +69,11 @@
       "enabled": true,
       "cronTime": "* * * * * *",
       "symbols": [
-        "XRPUSDT"
+        "BTCUSDT",
+        "XRPUSDT",
+        "DOGEUSDT",
+        "SOLUSDT"
+
       ],
       "botOptions": {
         "authentication": {
